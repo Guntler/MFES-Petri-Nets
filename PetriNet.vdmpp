@@ -1,0 +1,28 @@
+class PetriNet
+types
+
+values
+-- TODO Define values here
+instance variables
+-- TODO Define instance variables here
+	public Places : set of Place;
+	public Transitions : set of Transition;
+	public InitialMarking : map Place to nat;
+	public CurrentMarking : map Place to nat;
+	public Starts : Place;
+	public Finish : set of Place;
+	
+	--inv Starts not null
+	inv Starts in set Places and
+			Finish subset Places;
+			
+	inv forall t in set Transitions & dom t.Inputs subset Places and
+																		dom t.Outputs subset Places;
+	
+operations
+-- TODO Define operations here
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end PetriNet

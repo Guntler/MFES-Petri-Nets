@@ -1,0 +1,17 @@
+class Transition
+types
+-- TODO Define types here
+	public Weight = nat1;
+values
+-- TODO Define values here
+instance variables
+-- TODO Define instance variables here
+	public Inputs : map Place to Weight;
+	public Outputs : map Place to Weight;
+operations
+-- TODO Define operations here
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
+end Transition
