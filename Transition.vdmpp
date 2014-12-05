@@ -1,15 +1,22 @@
 class Transition
 types
--- TODO Define types here
 	public Weight = nat1;
-values
--- TODO Define values here
 instance variables
--- TODO Define instance variables here
 	public Inputs : map Place to Weight;
 	public Outputs : map Place to Weight;
 operations
--- TODO Define operations here
+	-- Constructor for the Transition.
+	-- @param inputs: the set of places that are inputs to this transition
+	-- @param outputs: the set of places that are outputs of this transition
+	-- @returns the transition
+	public Transition(inputs : map Place to Weight, outputs : map Place to Weight) 
+						result: Transition == (
+		Inputs := inputs;
+		Outputs := outputs;
+		return self;
+	)
+	post result.Inputs = inputs and result.Outputs = outputs;
+	
 functions
 -- TODO Define functiones here
 traces

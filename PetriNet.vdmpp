@@ -1,26 +1,63 @@
 class PetriNet
-types
-
-values
--- TODO Define values here
 instance variables
--- TODO Define instance variables here
-	public Places : set of Place;
-	public Transitions : set of Transition;
-	public InitialMarking : map Place to nat;
-	public CurrentMarking : map Place to nat;
-	public Starts : Place;
-	public Finish : set of Place;
+	public Places : set of Place := {};
+	public Transitions : set of Transition := {};
+	public InitialMarking : map Place to nat  := {|->};
+	public CurrentMarking : map Place to nat := {|->};
 	
-	--inv Starts not null
-	inv Starts in set Places and
-			Finish subset Places;
-			
 	inv forall t in set Transitions & dom t.Inputs subset Places and
 																		dom t.Outputs subset Places;
 	
 operations
--- TODO Define operations here
+	-- Constructor for the Petri Net.
+	-- @param places: the set of places in the net
+	-- @param transitions: the set of transitions in the net
+	-- @returns the petri net
+	public PetriNet(places: set of Place, transitions: set of Transition) result : PetriNet == (
+						Places := places;
+						Transitions := transitions;
+						InitialMarking := {|->};
+						CurrentMarking := InitialMarking;
+						
+						return self;				
+	)
+	pre forall t in set Transitions & dom t.Inputs subset Places and
+																		dom t.Outputs subset Places
+	post result.Places = places and result.Transitions = transitions and 
+								result.InitialMarking = {|->} and result.CurrentMarking = {|->};
+								
+								
+	-- Checks if a transition is enabled at the time.
+	-- @param t: the transition to check
+	-- @returns true if the transition is enabled, false otherwise
+	public transitionEnabled(t : Transition) result : bool == (
+		dcl enabled: bool := false;
+		if forall i in set dom t.Inputs & CurrentMarking(i) = t.Inputs(i) then
+			enabled := true;
+		
+		return enabled;
+	)
+	pre t in set Transitions;
+	
+	-- Gets all enabled transitions in the net.
+	-- @returns a set containing all enabled transitions at the time
+	public getEnabled() result : set of Transition == (
+		dcl enabledTrans: set of Transition := {};
+		
+		for all t in set Transitions do 
+			if transitionEnabled(t) then enabledTrans := enabledTrans union {t};
+			
+		return enabledTrans;
+	)
+	post result subset Transitions and
+				--TODO copiar codigo transitionEnabled para aqui
+				true;
+	
+	-- Resets the petri net marking to its initial marking.
+	public reset() == (
+		CurrentMarking := InitialMarking;
+	)
+	post CurrentMarking = InitialMarking;
 functions
 -- TODO Define functiones here
 traces
