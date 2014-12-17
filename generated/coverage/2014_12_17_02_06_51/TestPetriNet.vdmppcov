@@ -107,4 +107,9 @@ operations
 		new TestPetriNet().RunTest2();
 		new TestPetriNet().RunTest3();
 	);
+	
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
 end TestPetriNet

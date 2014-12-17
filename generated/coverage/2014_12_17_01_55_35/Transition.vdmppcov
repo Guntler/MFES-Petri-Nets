@@ -7,8 +7,6 @@ instance variables
 	public Inputs : map Place to Weight := {|->};
 	public Outputs : map Place to Weight := {|->};
 operations
-
-
 	-- Constructor for the Transition.
 	-- @param inputs: the set of places that are inputs to this transition
 	-- @param outputs: the set of places that are outputs of this transition
@@ -26,4 +24,8 @@ operations
 	pre (inputs <> {|->} or resets <> {} or inhibitors <> {}) and outputs <> {|->}
 	post result.Inputs = inputs and result.Outputs = outputs and result.Resets = resets and result.Inhibitors = inhibitors;
 	
+functions
+-- TODO Define functions here
+traces
+-- TODO Define Combinatorial Test Traces here
 end Transition

@@ -84,8 +84,6 @@ operations
 		
 		dcl pn1 : PetriNet := new PetriNet({p1,p2,p3,p4},{t1,t2});
 		
-		dcl reachable : set of PetriNet`Marking;
-		
 		p3.Id := 3;
 		p1.Id := 1;
 		p2.Id := 2;
@@ -94,11 +92,8 @@ operations
 		pn1.InitialMarking := {p1 |-> 1, p2 |-> 1, p3 |-> 0, p4 |-> 0};
 		pn1.CurrentMarking := {p1 |-> 1, p2 |-> 1, p3 |-> 0, p4 |-> 0};
 		
-		reachable := pn1.getReachableMarkings();
-		
-		assertTrue(reachable subset { {p1 |-> 1, p2 |-> 1, p3 |-> 0, p4 |-> 0} , {p1 |-> 0, p2 |-> 0, p3 |-> 1, p4 |-> 0}, {p1 |-> 0, p2 |-> 0, p3 |-> 0, p4 |-> 2}});
-		assertTrue(pn1.isMarkingReachable({p1 |-> 0, p2 |-> 0, p3 |-> 0, p4 |-> 2}));
-		assertTrue(pn1.isMarkingReachable({p1 |-> 0, p2 |-> 0, p3 |-> 0, p4 |-> 4}) = false);
+		assertTrue(pn1.getReachableMarkings() = { {p1 |-> 1, p2 |-> 1, p3 |-> 0, p4 |-> 0} , {p1 |-> 0, p2 |-> 0, p3 |-> 1, p4 |-> 0}, {p1 |-> 0, p2 |-> 1, p3 |-> 0, p4 |-> 2}});
+		assertTrue(pn1.isMarkingReachable({p1 |-> 0, p2 |-> 1, p3 |-> 0, p4 |-> 2}));
 	);
 	
 	public static main: () ==> ()
@@ -107,4 +102,9 @@ operations
 		new TestPetriNet().RunTest2();
 		new TestPetriNet().RunTest3();
 	);
+	
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
 end TestPetriNet

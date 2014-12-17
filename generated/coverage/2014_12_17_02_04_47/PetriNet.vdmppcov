@@ -7,14 +7,13 @@ instance variables
 	public InitialMarking : Marking  := {|->};
 	public CurrentMarking : Marking := {|->};
 	
-	-- Checks if all inputs, outputs, resets and inhibitors in every transition belong to the set of places in this Petri net.
 	inv forall t in set Transitions & dom t.Inputs subset Places and
 																		dom t.Outputs subset Places and
 																		t.Resets subset Places and
 																		t.Inhibitors subset Places;
-
 	
 operations
+
 
 
 	-- Constructor for the Petri Net.
@@ -101,8 +100,7 @@ operations
 			 (forall p in set dom t.Outputs & CurrentMarking(p) = CurrentMarking~(p) + t.Outputs(p));
 			 
 	
-	-- Calculates the reachability graph of this Petri net.
-	-- @returns the reachability graph of this petry net.
+	
 	public calculateReachabilityGraph() result : ReachabilityGraph == (
 		dcl Graph : ReachabilityGraph := new ReachabilityGraph();
 		dcl Work : seq of Marking := [InitialMarking];
@@ -144,10 +142,6 @@ operations
 				result.InitialV = InitialMarking and
 				(forall e in set result.Edges & dom e.Origin subset Places and dom e.Result subset Places and e.T in set Transitions);
 	
-	
-	-- Calculates if a given marking is reachable from the initial marking on this Petri net.
-	-- @param m: the marking to calculate the reachability for.
-	-- @returns true if m is reachable, false otherwise.
 	public isMarkingReachable(m : Marking) result : bool == (
 		dcl Graph : ReachabilityGraph := calculateReachabilityGraph();
 		if m in set Graph.Vertexes then return true;
@@ -156,14 +150,15 @@ operations
 	)
 	pre dom m subset Places;
 	
-	
-	
-	-- Calculates the set of reachable markings from the initial marking in this Petri net.
-	-- @returns the set of reachable markings.
 	public getReachableMarkings() result : set of Marking == (
 		dcl Graph : ReachabilityGraph := calculateReachabilityGraph();
 		return Graph.Vertexes;
 	)
 	post forall m in set result & dom m subset Places;
-
+	
+	
+functions
+-- TODO Define functiones here
+traces
+-- TODO Define Combinatorial Test Traces here
 end PetriNet
