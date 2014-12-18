@@ -12,12 +12,8 @@ instance variables
 																		dom t.Outputs subset Places and
 																		t.Resets subset Places and
 																		t.Inhibitors subset Places;
-	
-	-- Checks if all transitions have at least one input arc and one output arc.
-	inv forall t in set Transitions & (dom t.Inputs <> {} or t.Resets <> {} or t.Inhibitors <> {}) and dom t.Outputs <> {};
 
-	-- No places with tokens over their capacity.
-	inv forall p in set dom CurrentMarking & p.LimitedCapacity = true => CurrentMarking(p) <= p.Capacity;
+	
 operations
 
 
@@ -33,23 +29,10 @@ operations
 						
 						return self;				
 	)
-	pre (forall t in set Transitions & dom t.Inputs subset Places and 	-- All inputs, outputs, resets and inhibitors are in the set of Places of this Petri Net.
-																		dom t.Outputs subset Places and
-																		t.Resets subset Places and
-																		t.Inhibitors subset Places) and
-			 (forall p in set dom InitialMarking & p in set Places) and			-- All places in the initial and current markings must be in the set of Places of this Petri Net.
-			 (forall p in set dom CurrentMarking & p in set Places)
+	pre forall t in set Transitions & dom t.Inputs subset Places and
+																		dom t.Outputs subset Places
 	post result.Places = places and result.Transitions = transitions and 
 								result.InitialMarking = {|->} and result.CurrentMarking = {|->};
-		
-				
-	-- Initializes this Petri Net with the provided marking.
-	-- @param m: the initial marking of the Petri Net.
-	public initializeMarking(m : Marking) == (
-		InitialMarking := m;
-		CurrentMarking := InitialMarking;
-	)
-	pre dom m subset Places;
 					
 								
 								
@@ -67,15 +50,9 @@ operations
 			if CurrentMarking(i) > 0 then enabled := false;
 		);
 		
-		for all o in set dom t.Outputs do (
-			if o.LimitedCapacity and CurrentMarking(o) + t.Outputs(o) > o.Capacity then enabled := false;
-		);
-		
 		return enabled;
 	)
-	pre t in set Transitions
-	post result = true => ((forall i in set dom t.Inputs & CurrentMarking(i) >= t.Inputs(i)) and   -- If true the transition must be enabled.
-													(forall i in set t.Inhibitors & CurrentMarking(i) = 0));
+	pre t in set Transitions;
 	
 	
 	
@@ -90,7 +67,7 @@ operations
 		return enabledTrans;
 	)
 	post result subset Transitions and
-				(forall t in set result & forall i in set dom t.Inputs & CurrentMarking(i) >= t.Inputs(i)) and -- All returned transitions must be enabled.
+				(forall t in set result & forall i in set dom t.Inputs & CurrentMarking(i) = t.Inputs(i)) and
 				(forall t in set result & forall i in set t.Inhibitors & CurrentMarking(i) = 0);
 	
 	
@@ -118,9 +95,9 @@ operations
 		);
 	)
 	pre t in set Transitions and 
-				(forall i in set dom t.Inputs & CurrentMarking(i) >= t.Inputs(i)) and   -- The transition must be enabled.
+				(forall i in set dom t.Inputs & CurrentMarking(i) = t.Inputs(i)) and
 				(forall i in set t.Inhibitors & CurrentMarking(i) = 0)
-	post (forall p in set dom t.Inputs & CurrentMarking(p) = CurrentMarking~(p) - t.Inputs(p)) and  -- The tokens in the new marking must be set correctly.
+	post (forall p in set dom t.Inputs & CurrentMarking(p) = CurrentMarking~(p) - t.Inputs(p)) and
 			 (forall p in set dom t.Outputs & CurrentMarking(p) = CurrentMarking~(p) + t.Outputs(p));
 			 
 	
@@ -163,9 +140,9 @@ operations
 		
 		return Graph;
 	)
-	post (forall m in set result.Vertexes & dom m subset Places) and -- All vertexes must belong to the set of Places of this Petri Net
+	post (forall m in set result.Vertexes & dom m subset Places) and 
 				result.InitialV = InitialMarking and
-				(forall e in set result.Edges & dom e.Origin subset Places and dom e.Result subset Places and e.T in set Transitions); -- All of the edges must connect two Places in this Petri Net.
+				(forall e in set result.Edges & dom e.Origin subset Places and dom e.Result subset Places and e.T in set Transitions);
 	
 	
 	-- Calculates if a given marking is reachable from the initial marking on this Petri net.
@@ -177,7 +154,7 @@ operations
 		
 		return false;
 	)
-	pre dom m subset Places; -- All places in the provided marking must belong to the set of Places of this Petri Net.
+	pre dom m subset Places;
 	
 	
 	
@@ -187,6 +164,6 @@ operations
 		dcl Graph : ReachabilityGraph := calculateReachabilityGraph();
 		return Graph.Vertexes;
 	)
-	post forall m in set result & dom m subset Places;  -- All places in every marking returned must belong to the set of Places in this Petri Net.
+	post forall m in set result & dom m subset Places;
 
 end PetriNet

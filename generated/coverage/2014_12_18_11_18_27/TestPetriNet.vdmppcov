@@ -1,4 +1,10 @@
 class TestPetriNet
+types
+-- TODO Define types here
+values
+-- TODO Define values here
+instance variables
+-- TODO Define instance variables here
 operations
 	private assertTrue: bool ==> ()
 		assertTrue(cond) == return
@@ -21,7 +27,8 @@ operations
 		p2.Id := 2;
 		p4.Id := 4;
 		
-		pn1.initializeMarking({p1 |-> 1, p2 |-> 0, p3 |-> 0, p4 |-> 0});
+		pn1.InitialMarking := {p1 |-> 1, p2 |-> 0, p3 |-> 0, p4 |-> 0};
+		pn1.CurrentMarking := {p1 |-> 1, p2 |-> 0, p3 |-> 0, p4 |-> 0};
 		
 		assertTrue(pn1.transitionEnabled(t1) = true);
 		assertTrue(pn1.transitionEnabled(t2) = false);
@@ -59,7 +66,8 @@ operations
 		p2.Id := 2;
 		p4.Id := 4;
 		
-		pn1.initializeMarking({p1 |-> 1, p2 |-> 0, p3 |-> 0, p4 |-> 0});
+		pn1.InitialMarking := {p1 |-> 1, p2 |-> 0, p3 |-> 0, p4 |-> 0};
+		pn1.CurrentMarking := {p1 |-> 1, p2 |-> 0, p3 |-> 0, p4 |-> 0};
 		
 		assertTrue(pn1.getEnabled() = {t1,t2});
 		
@@ -93,7 +101,8 @@ operations
 		p2.Id := 2;
 		p4.Id := 4;
 		
-		pn1.initializeMarking({p1 |-> 1, p2 |-> 1, p3 |-> 0, p4 |-> 0});
+		pn1.InitialMarking := {p1 |-> 1, p2 |-> 1, p3 |-> 0, p4 |-> 0};
+		pn1.CurrentMarking := {p1 |-> 1, p2 |-> 1, p3 |-> 0, p4 |-> 0};
 		
 		reachable := pn1.getReachableMarkings();
 		
@@ -102,7 +111,7 @@ operations
 		assertTrue(pn1.isMarkingReachable({p1 |-> 0, p2 |-> 0, p3 |-> 0, p4 |-> 4}) = false);
 	);
 	
-	-- Tests the definition and step-wise execution of an extended Petri Net with Place capacities.
+		-- Tests the definition and step-wise execution of an extended Petri Net with Place capabilities.
 	public RunTest4() == (
 		dcl p1 : Place := new Place();
 		dcl p2 : Place := new Place();
@@ -110,7 +119,7 @@ operations
 		dcl p4 : Place := new Place();
 		
 		dcl t1 : Transition := new Transition({p1 |-> 1},{p2 |-> 2, p3 |-> 1},{},{});
-		dcl t2 : Transition := new Transition({p2 |-> 1, p3 |-> 1}, {p1 |-> 1, p4 |-> 4},{},{});
+		dcl t2 : Transition := new Transition({p2 |-> 1, p3 |-> 1}, {p4 |-> 4},{},{});
 		
 		dcl pn1 : PetriNet := new PetriNet({p1,p2,p3,p4},{t1,t2});
 		
@@ -118,10 +127,9 @@ operations
 		p1.Id := 1;
 		p2.Id := 2;
 		p4.Id := 4;
-		p2.LimitedCapacity := true;
-		p2.Capacity := 2;
 		
-		pn1.initializeMarking({p1 |-> 1, p2 |-> 0, p3 |-> 0, p4 |-> 0});
+		pn1.InitialMarking := {p1 |-> 1, p2 |-> 0, p3 |-> 0, p4 |-> 0};
+		pn1.CurrentMarking := {p1 |-> 1, p2 |-> 0, p3 |-> 0, p4 |-> 0};
 		
 		assertTrue(pn1.transitionEnabled(t1) = true);
 		assertTrue(pn1.transitionEnabled(t2) = false);
@@ -133,48 +141,8 @@ operations
 		
 		pn1.fireTransition(t2);
 		
-		assertTrue(pn1.transitionEnabled(t1) = false);
-		assertTrue(pn1.transitionEnabled(t2) = false);
-		
 		assertTrue(pn1.CurrentMarking(p4) = 4);
 		assertTrue(pn1.CurrentMarking(p2) = 1);
-		assertTrue(pn1.CurrentMarking(p1) = 1);
-	);
-	
-	-- Tests the definition of an invalid Petri Net with a transition from a Place not in the Petri Net.
-	-- This test should fail.
-	public RunTest5() == (
-		dcl p1 : Place := new Place();
-		dcl p2 : Place := new Place();
-		dcl p3 : Place := new Place();
-		dcl p4 : Place := new Place();
-		dcl p5 : Place := new Place();
-		
-		dcl t1 : Transition := new Transition({p1 |-> 1},{p2 |-> 2, p3 |-> 1},{},{});
-		dcl t2 : Transition := new Transition({p2 |-> 1, p3 |-> 1}, {p1 |-> 1, p4 |-> 4},{p5},{});
-		
-		dcl pn1 : PetriNet := new PetriNet({p1,p2,p3,p4},{t1,t2});
-		
-		IO`println("This should fail.");
-	);
-	
-	-- Tests the definition of an invalid Petri Net with the current marking containing a Place not in the Petri Net.
-	-- This test should fail.
-	public RunTest6() == (
-		dcl p1 : Place := new Place();
-		dcl p2 : Place := new Place();
-		dcl p3 : Place := new Place();
-		dcl p4 : Place := new Place();
-		dcl p5 : Place := new Place();
-		
-		dcl t1 : Transition := new Transition({p1 |-> 1},{p2 |-> 2, p3 |-> 1},{},{});
-		dcl t2 : Transition := new Transition({p2 |-> 1, p3 |-> 1}, {p1 |-> 1, p4 |-> 4},{},{});
-		
-		dcl pn1 : PetriNet := new PetriNet({p1,p2,p3,p4},{t1,t2});
-		
-		pn1.initializeMarking({p1 |-> 1, p2 |-> 0, p3 |-> 0, p4 |-> 0, p5 |-> 1});
-		
-		IO`println("This should fail.");
 	);
 	
 	-- Executes the test suite.
@@ -183,8 +151,5 @@ operations
 		new TestPetriNet().RunTest1();
 		new TestPetriNet().RunTest2();
 		new TestPetriNet().RunTest3();
-		new TestPetriNet().RunTest4();
-		new TestPetriNet().RunTest5(); -- Comment out this test in order to succeed.
-		new TestPetriNet().RunTest6(); -- Comment out this test in order to succeed.
 	);
 end TestPetriNet

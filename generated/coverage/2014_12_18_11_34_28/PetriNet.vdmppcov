@@ -33,7 +33,7 @@ operations
 						
 						return self;				
 	)
-	pre (forall t in set Transitions & dom t.Inputs subset Places and 	-- All inputs, outputs, resets and inhibitors are in the set of Places of this Petri Net.
+	pre (forall t in set Transitions & dom t.Inputs subset Places and 	-- All inputs, outputs, resets and inhibitors are in the set of Places of this Petri Net..
 																		dom t.Outputs subset Places and
 																		t.Resets subset Places and
 																		t.Inhibitors subset Places) and
@@ -73,9 +73,7 @@ operations
 		
 		return enabled;
 	)
-	pre t in set Transitions
-	post result = true => ((forall i in set dom t.Inputs & CurrentMarking(i) >= t.Inputs(i)) and   -- If true the transition must be enabled.
-													(forall i in set t.Inhibitors & CurrentMarking(i) = 0));
+	pre t in set Transitions;
 	
 	
 	

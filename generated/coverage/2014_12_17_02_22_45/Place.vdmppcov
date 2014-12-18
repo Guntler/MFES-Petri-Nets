@@ -1,0 +1,4 @@
+class Place
+instance variables
+	public Id : nat := 0;
+end Place

@@ -33,7 +33,7 @@ operations
 						
 						return self;				
 	)
-	pre (forall t in set Transitions & dom t.Inputs subset Places and 	-- All inputs, outputs, resets and inhibitors are in the set of Places of this Petri Net.
+	pre (forall t in set Transitions & dom t.Inputs subset Places and 	-- All inputs, outputs, resets and inhibitors are in the set of Places of this Petri Net..
 																		dom t.Outputs subset Places and
 																		t.Resets subset Places and
 																		t.Inhibitors subset Places) and
@@ -41,15 +41,6 @@ operations
 			 (forall p in set dom CurrentMarking & p in set Places)
 	post result.Places = places and result.Transitions = transitions and 
 								result.InitialMarking = {|->} and result.CurrentMarking = {|->};
-		
-				
-	-- Initializes this Petri Net with the provided marking.
-	-- @param m: the initial marking of the Petri Net.
-	public initializeMarking(m : Marking) == (
-		InitialMarking := m;
-		CurrentMarking := InitialMarking;
-	)
-	pre dom m subset Places;
 					
 								
 								
@@ -73,9 +64,7 @@ operations
 		
 		return enabled;
 	)
-	pre t in set Transitions
-	post result = true => ((forall i in set dom t.Inputs & CurrentMarking(i) >= t.Inputs(i)) and   -- If true the transition must be enabled.
-													(forall i in set t.Inhibitors & CurrentMarking(i) = 0));
+	pre t in set Transitions;
 	
 	
 	
@@ -90,7 +79,7 @@ operations
 		return enabledTrans;
 	)
 	post result subset Transitions and
-				(forall t in set result & forall i in set dom t.Inputs & CurrentMarking(i) >= t.Inputs(i)) and -- All returned transitions must be enabled.
+				(forall t in set result & forall i in set dom t.Inputs & CurrentMarking(i) = t.Inputs(i)) and -- All returned transitions must be enabled.
 				(forall t in set result & forall i in set t.Inhibitors & CurrentMarking(i) = 0);
 	
 	
@@ -118,7 +107,7 @@ operations
 		);
 	)
 	pre t in set Transitions and 
-				(forall i in set dom t.Inputs & CurrentMarking(i) >= t.Inputs(i)) and   -- The transition must be enabled.
+				(forall i in set dom t.Inputs & CurrentMarking(i) = t.Inputs(i)) and   -- The transition must be enabled.
 				(forall i in set t.Inhibitors & CurrentMarking(i) = 0)
 	post (forall p in set dom t.Inputs & CurrentMarking(p) = CurrentMarking~(p) - t.Inputs(p)) and  -- The tokens in the new marking must be set correctly.
 			 (forall p in set dom t.Outputs & CurrentMarking(p) = CurrentMarking~(p) + t.Outputs(p));

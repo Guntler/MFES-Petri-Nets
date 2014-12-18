@@ -1,4 +1,10 @@
 class TestPetriNet
+types
+-- TODO Define types here
+values
+-- TODO Define values here
+instance variables
+-- TODO Define instance variables here
 operations
 	private assertTrue: bool ==> ()
 		assertTrue(cond) == return
@@ -158,7 +164,7 @@ operations
 		IO`println("This should fail.");
 	);
 	
-	-- Tests the definition of an invalid Petri Net with the current marking containing a Place not in the Petri Net.
+		-- Tests the definition of an invalid Petri Net with the current marking containing a Place not in the Petri Net.
 	-- This test should fail.
 	public RunTest6() == (
 		dcl p1 : Place := new Place();
@@ -185,6 +191,6 @@ operations
 		new TestPetriNet().RunTest3();
 		new TestPetriNet().RunTest4();
 		new TestPetriNet().RunTest5(); -- Comment out this test in order to succeed.
-		new TestPetriNet().RunTest6(); -- Comment out this test in order to succeed.
+		new TestPetriNet().RunTest6();
 	);
 end TestPetriNet
