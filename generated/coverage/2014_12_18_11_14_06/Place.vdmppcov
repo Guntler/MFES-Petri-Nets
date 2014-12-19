@@ -1,6 +1,0 @@
-class Place
-instance variables
-	public Id : nat := 0;
-	public LimitedCapacity : bool := false;
-	public Capacity : nat := 1;
-end Place

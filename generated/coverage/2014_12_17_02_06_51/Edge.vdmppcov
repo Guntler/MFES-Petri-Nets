@@ -1,6 +1,0 @@
-class Edge
-instance variables
-	public Origin : PetriNet`Marking := {|->};
-	public Result : PetriNet`Marking := {|->};
-	public T : Transition;
-end Edge

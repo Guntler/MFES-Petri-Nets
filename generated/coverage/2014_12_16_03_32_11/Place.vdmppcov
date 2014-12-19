@@ -1,4 +1,0 @@
-class Place
-instance variables
-	public Id : nat;
-end Place

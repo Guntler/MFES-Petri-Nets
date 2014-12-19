@@ -1,6 +1,0 @@
-class ReachabilityGraph
-instance variables
-	public Vertexes : set of PetriNet`Marking;
-	public Edges : set of Edge;
-	public InitialV : PetriNet`Marking;
-end ReachabilityGraph
