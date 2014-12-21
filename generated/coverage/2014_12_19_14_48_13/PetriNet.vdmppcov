@@ -1,0 +1,194 @@
+class PetriNet
+types
+	public Marking = map Place to nat;
+instance variables
+	public Places : set of Place := {};
+	public Transitions : set of Transition := {};
+	public InitialMarking : Marking  := {|->};
+	public CurrentMarking : Marking := {|->};
+	
+	-- Checks if all inputs, outputs, resets and inhibitors in every transition belong to the set of places in this Petri net.
+	inv forall t in set Transitions & dom t.Inputs subset Places and
+																		dom t.Outputs subset Places and
+																		t.Resets subset Places and
+																		t.Inhibitors subset Places;
+	
+	-- Checks if all transitions have at least one input arc and one output arc.
+	inv forall t in set Transitions & (dom t.Inputs <> {} or t.Resets <> {} or t.Inhibitors <> {}) and dom t.Outputs <> {};
+
+	-- No places with tokens over their capacity.
+	inv forall p in set dom CurrentMarking & p.LimitedCapacity = true => CurrentMarking(p) <= p.Capacity;
+	
+operations
+
+
+	-- Constructor for the Petri Net.
+	-- @param places: the set of places in the net
+	-- @param transitions: the set of transitions in the net
+	-- @returns the petri net
+	public PetriNet(places: set of Place, transitions: set of Transition) result : PetriNet == (
+						Places := places;
+						Transitions := transitions;
+						InitialMarking := {|->};
+						CurrentMarking := InitialMarking;
+						
+						return self;				
+	)
+	pre (forall t in set Transitions & dom t.Inputs subset Places and 	-- All inputs, outputs, resets and inhibitors are in the set of Places of this Petri Net.
+																		dom t.Outputs subset Places and
+																		t.Resets subset Places and
+																		t.Inhibitors subset Places) and
+			 (forall p in set dom InitialMarking & p in set Places) and			-- All places in the initial and current markings must be in the set of Places of this Petri Net.
+			 (forall p in set dom CurrentMarking & p in set Places)
+	post result.Places = places and result.Transitions = transitions and 
+								result.InitialMarking = {|->} and result.CurrentMarking = {|->};
+		
+				
+	-- Initializes this Petri Net with the provided marking.
+	-- @param m: the initial marking of the Petri Net.
+	public initializeMarking(m : Marking) == (
+		InitialMarking := m;
+		CurrentMarking := InitialMarking;
+	)
+	pre dom m = Places;
+					
+								
+								
+	-- Checks if a transition is enabled at the time.
+	-- @param t: the transition to check
+	-- @returns true if the transition is enabled, false otherwise
+	public transitionEnabled(t : Transition) result : bool == (
+		dcl enabled: bool := true;
+		
+		for all i in set dom t.Inputs do (
+			if CurrentMarking(i) < t.Inputs(i) then enabled := false;
+		);
+		
+		for all i in set t.Inhibitors do (
+			if CurrentMarking(i) > 0 then enabled := false;
+		);
+		
+		for all o in set dom t.Outputs do (
+			if o.LimitedCapacity and CurrentMarking(o) + t.Outputs(o) > o.Capacity then enabled := false;
+		);
+		
+		return enabled;
+	)
+	pre t in set Transitions and dom CurrentMarking = Places
+	post result = true => ((forall i in set dom t.Inputs & CurrentMarking(i) >= t.Inputs(i)) and   -- If true the transition must be enabled.
+													(forall i in set t.Inhibitors & CurrentMarking(i) = 0));
+	
+	
+	
+	-- Gets all enabled transitions in the net.
+	-- @returns a set containing all enabled transitions at the time
+	public getEnabled() result : set of Transition == (
+		dcl enabledTrans: set of Transition := {};
+		
+		for all t in set Transitions do 
+			if transitionEnabled(t) then enabledTrans := enabledTrans union {t};
+			
+		return enabledTrans;
+	)
+	post result subset Transitions and
+				(forall t in set result & forall i in set dom t.Inputs & CurrentMarking(i) >= t.Inputs(i)) and -- All returned transitions must be enabled.
+				(forall t in set result & forall i in set t.Inhibitors & CurrentMarking(i) = 0);
+	
+	
+	
+	-- Resets the petri net marking to its initial marking.
+	public reset() == (
+		CurrentMarking := InitialMarking;
+	)
+	pre dom InitialMarking = Places
+	post CurrentMarking = InitialMarking;
+	
+	
+	
+	-- Triggers the selected transition if it's enabled.
+	-- @param t: The transition to trigger.
+	public fireTransition(t : Transition) == (
+		if(transitionEnabled(t)) then (
+			for all i in set dom t.Inputs do
+				CurrentMarking := CurrentMarking ++ {i |-> CurrentMarking(i) - t.Inputs(i)};
+		
+			for all o in set dom t.Outputs do
+				CurrentMarking := CurrentMarking ++ {o |-> CurrentMarking(o) + t.Outputs(o)};
+				
+			for all r in set t.Resets do
+				CurrentMarking := CurrentMarking ++ {r |-> 0};
+		);
+	)
+	pre t in set Transitions and 
+				(forall i in set dom t.Inputs & CurrentMarking(i) >= t.Inputs(i)) and   -- The transition must be enabled.
+				(forall i in set t.Inhibitors & CurrentMarking(i) = 0)
+	post (forall p in set dom t.Inputs & CurrentMarking(p) = CurrentMarking~(p) - t.Inputs(p)) and  -- The tokens in the new marking must be set correctly.
+			 (forall p in set dom t.Outputs & CurrentMarking(p) = CurrentMarking~(p) + t.Outputs(p));
+			 
+	
+	-- Calculates the reachability graph of this Petri net.
+	-- @returns the reachability graph of this petry net.
+	public calculateReachabilityGraph() result : ReachabilityGraph == (
+		dcl Graph : ReachabilityGraph := new ReachabilityGraph();
+		dcl Work : seq of Marking := [InitialMarking];
+		dcl M : Marking;
+		dcl newM : Marking;
+		dcl edge : Edge;
+		dcl pn : PetriNet := new PetriNet(Places,Transitions);
+		pn.InitialMarking := InitialMarking;
+		
+		Graph.Vertexes := {InitialMarking};
+		Graph.Edges := {};
+		Graph.InitialV := InitialMarking;
+		
+		while Work <> [] do (
+			M := hd Work;
+			Work := tl Work;
+			
+			pn.CurrentMarking := M;
+			for all t in set pn.getEnabled() do (
+				pn.fireTransition(t);
+				newM := pn.CurrentMarking;
+				if newM not in set Graph.Vertexes then (
+					Graph.Vertexes := Graph.Vertexes union {newM};
+					Work := Work ^ [newM];
+				);
+				
+				edge := new Edge();
+				edge.Origin := M;
+				edge.Result := newM;
+				edge.T := t;
+				
+				Graph.Edges := Graph.Edges union {edge};
+			);
+		);
+		
+		return Graph;
+	)
+	post (forall m in set result.Vertexes & dom m subset Places) and -- All vertexes must belong to the set of Places of this Petri Net
+				result.InitialV = InitialMarking and
+				(forall e in set result.Edges & dom e.Origin subset Places and dom e.Result subset Places and e.T in set Transitions); -- All of the edges must connect two Places in this Petri Net.
+	
+	
+	-- Calculates if a given marking is reachable from the initial marking on this Petri net.
+	-- @param m: the marking to calculate the reachability for.
+	-- @returns true if m is reachable, false otherwise.
+	public isMarkingReachable(m : Marking) result : bool == (
+		dcl Graph : ReachabilityGraph := calculateReachabilityGraph();
+		if m in set Graph.Vertexes then return true;
+		
+		return false;
+	)
+	pre dom m subset Places; -- All places in the provided marking must belong to the set of Places of this Petri Net.
+	
+	
+	
+	-- Calculates the set of reachable markings from the initial marking in this Petri net.
+	-- @returns the set of reachable markings.
+	public getReachableMarkings() result : set of Marking == (
+		dcl Graph : ReachabilityGraph := calculateReachabilityGraph();
+		return Graph.Vertexes;
+	)
+	post forall m in set result & dom m subset Places;  -- All places in every marking returned must belong to the set of Places in this Petri Net.
+
+end PetriNet
